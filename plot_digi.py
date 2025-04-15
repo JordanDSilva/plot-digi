@@ -3,6 +3,8 @@ import numpy as np
 from PIL import Image
 import tkinter as tk
 from tkinter import filedialog
+import csv
+import os
 
 # Step 1: Load image
 def load_image():
@@ -79,6 +81,26 @@ def extract_data(img, anchors, x_range, y_range):
 
     return np.array(data_points)
 
+def save_data_via_dialog(data, default_name="digitized_data.csv"):
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".csv",
+        filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+        initialfile=default_name,
+        title="Save digitized data"
+    )
+
+    if file_path:
+        with open(file_path, mode='w', newline='') as file:
+           writer = csv.writer(file)
+           writer.writerow(["X", "Y"])
+           writer.writerows(data)
+        print(f"Data saved to {file_path}")
+    else:
+        print("Save cancelled.")
+
 # ---- Main App Flow ---- #
 if __name__ == "__main__":
     img = load_image()
@@ -131,19 +153,4 @@ if __name__ == "__main__":
         plt.yscale('log')
     plt.show()
 
-    import csv
-    import os
-
-    # Ask for filename and export to CSV
-    filename = input("Enter a name for the CSV file (without extension): ")
-    filename = filename.strip().replace(" ", "_") + ".csv"
-
-    # Save the data
-    csv_path = os.path.join(os.getcwd(), filename)
-    with open(csv_path, mode='w', newline='') as file:
-       writer = csv.writer(file)
-       writer.writerow(["X", "Y"])
-       writer.writerows(data)
-
-    print(f"✅ Data saved to: {csv_path}")
-
+    save_data_via_dialog(data)

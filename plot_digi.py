@@ -24,7 +24,7 @@ def digitize_graph(img):
         if len(anchor_pts) < 4:
             if event.button == 1:
                 anchor_pts.append((event.xdata, event.ydata))
-                point = ax.plot(event.xdata, event.ydata, 'ro')
+                point = ax.plot(event.xdata, event.ydata, color = 'tab:red', marker = "s", alpha = 0.7)
                 point_artists.append(point)
             elif event.button == 3:  # Right click to remove last
                 anchor_pts.pop(-1)
@@ -54,12 +54,12 @@ def extract_data(img, anchors, x_range, y_range):
     y_data_min, y_data_max = y_range
 
     for pp in anchors:
-        ax.plot(pp[0], pp[1], 'ro')
+        ax.plot(pp[0], pp[1], color = 'tab:red', marker = "s", alpha = 0.7)
 
     def onclick(event):
         if event.button == 1:  # Left click to add
             curve_pts.append((event.xdata, event.ydata))
-            point = ax.plot(event.xdata, event.ydata, 'go')[0]
+            point = ax.plot(event.xdata, event.ydata, color = 'magenta', marker = "s")[0]
             point_artists.append(point)
             fig.canvas.draw()
         elif event.button == 3 and curve_pts:  # Right click to remove last
@@ -90,7 +90,31 @@ if __name__ == "__main__":
     y_min = float(input("Y axis min: "))
     y_max = float(input("Y axis max: "))
 
-    data = extract_data(img, anchor_points, (x_min, x_max), (y_min, y_max))
+    log_x = str(input("Log the X axis (True/False): "))
+    log_y = str(input("Log the Y axis (True/False): "))
+
+    if log_x == "True":
+        log_x = True
+    else:
+        log_x = False
+    if log_y == "True":
+        log_y = True
+    else:
+        log_y = False
+
+    if log_x and not log_y:
+        data = extract_data(img, anchor_points, (np.log10(x_min), np.log10(x_max)), (y_min, y_max))
+        data[:, 0] = 10**data[:, 0]
+    elif log_y and not log_x:
+        data = extract_data(img, anchor_points, (x_min, x_max), (np.log10(y_min), np.log10(y_max)))
+        data[:, 1] = 10 ** data[:, 1]
+    elif log_x and log_y:
+        data = extract_data(img, anchor_points, (np.log10(x_min), np.log10(x_max)), (np.log10(y_min), np.log10(y_max)))
+        data[:, 0] = 10 ** data[:, 0]
+        data[:, 1] = 10 ** data[:, 1]
+    else:
+        data = extract_data(img, anchor_points, (x_min, x_max), (y_min, y_max))
+
     print("Extracted Data Points:")
     print(data)
 
@@ -101,6 +125,10 @@ if __name__ == "__main__":
     plt.ylabel("Y")
     plt.title("Digitized Data")
     plt.grid(True)
+    if log_x:
+        plt.xscale('log')
+    if log_y:
+        plt.yscale('log')
     plt.show()
 
     import csv

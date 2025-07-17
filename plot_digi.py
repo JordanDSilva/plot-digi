@@ -85,6 +85,9 @@ def save_data_via_dialog(data, default_name="digitized_data.csv"):
     root = tk.Tk()
     root.withdraw()  # Hide the root window
 
+    Xname = str(input("X variable name: "))
+    Yname = str(input("Y variable name: "))
+
     file_path = filedialog.asksaveasfilename(
         defaultextension=".csv",
         filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
@@ -95,7 +98,7 @@ def save_data_via_dialog(data, default_name="digitized_data.csv"):
     if file_path:
         with open(file_path, mode='w', newline='') as file:
            writer = csv.writer(file)
-           writer.writerow(["X", "Y"])
+           writer.writerow([Xname, Yname])
            writer.writerows(data)
         print(f"Data saved to {file_path}")
     else:

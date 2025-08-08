@@ -15,7 +15,7 @@ def load_image():
 
 # Step 2: Click anchors and extract data
 def digitize_graph(img):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize = (8,8))
     ax.imshow(img)
     ax.set_title("Click 4 anchor points in order:\n"
                  "x_min, x_max, y_min, y_max (on the image)")
@@ -44,7 +44,7 @@ def digitize_graph(img):
 
 # Step 3: Map from pixel space to data space
 def extract_data(img, anchors, x_range, y_range):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize = (8,8))
     ax.imshow(img)
     ax.set_title("LEFT click: add point | RIGHT click: remove last\nClose window when done.")
     curve_pts = []
@@ -120,23 +120,25 @@ if __name__ == "__main__":
 
     if log_x == "True":
         log_x = True
+        log_x_base = float(input("Log base of the X axis (number): ") or 10)
     else:
         log_x = False
     if log_y == "True":
         log_y = True
+        log_y_base = float(input("Log base of the Y axis (number): ") or 10)
     else:
         log_y = False
 
     if log_x and not log_y:
-        data = extract_data(img, anchor_points, (np.log10(x_min), np.log10(x_max)), (y_min, y_max))
-        data[:, 0] = 10**data[:, 0]
+        data = extract_data(img, anchor_points, (np.log(x_min)/np.log(log_x_base), np.log(x_max)/np.log(log_x_base)), (y_min, y_max))
+        data[:, 0] = log_x_base ** data[:, 0]
     elif log_y and not log_x:
-        data = extract_data(img, anchor_points, (x_min, x_max), (np.log10(y_min), np.log10(y_max)))
-        data[:, 1] = 10 ** data[:, 1]
+        data = extract_data(img, anchor_points, (x_min, x_max), (np.log10(y_min)/np.log(log_y_base), np.log(y_max)/np.log(log_y_base)))
+        data[:, 1] = log_y_base ** data[:, 1]
     elif log_x and log_y:
-        data = extract_data(img, anchor_points, (np.log10(x_min), np.log10(x_max)), (np.log10(y_min), np.log10(y_max)))
-        data[:, 0] = 10 ** data[:, 0]
-        data[:, 1] = 10 ** data[:, 1]
+        data = extract_data(img, anchor_points, (np.log(x_min)/np.log(log_x_base), np.log(x_max)/np.log(log_x_base)), (np.log10(y_min)/np.log(log_y_base), np.log(y_max)/np.log(log_y_base)))
+        data[:, 0] = log_x_base ** data[:, 0]
+        data[:, 1] = log_y_base ** data[:, 1]
     else:
         data = extract_data(img, anchor_points, (x_min, x_max), (y_min, y_max))
 
